@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Z4MDAR</title>
+<style>
+  :root { --red: #ff2b2b; --glass: rgba(10, 10, 12, .55); --line: rgba(255, 255, 255, .14); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; }
+  body {
+    font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+  }
 
+  /* Background */
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -3; }
+  .shade {
+    position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(255, 43, 43, .14), transparent 60%),
+      linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .8));
+  }
+
+  /* Enter screen */
+  #enter {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    background: #000;
+    cursor: pointer;
+    transition: opacity .8s ease, visibility .8s;
+  }
+  #enter .brand { font-size: 44px; font-weight: 900; letter-spacing: 6px; }
+  #enter .tap { color: #888; font-size: 16px; letter-spacing: 3px; animation: pulse 2s ease-in-out infinite; }
+  #enter.hide { opacity: 0; visibility: hidden; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  .w { color: #fff; } .r { color: var(--red); }
+
+  /* Nav */
+  nav {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 22px 16px;
+    font-weight: 900; letter-spacing: 5px; font-size: 20px;
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, .35);
+  }
+
+  /* Card */
+  main {
+    min-height: calc(100% - 62px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+  .card {
+    width: 100%; max-width: 420px;
+    padding: 36px 24px 28px;
+    text-align: center;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .6), 0 0 80px rgba(255, 43, 43, .08);
+    opacity: 0; transform: translateY(16px);
+    transition: opacity .9s .3s ease, transform .9s .3s ease;
+  }
+  body.in .card { opacity: 1; transform: none; }
+
+  .logo {
+    width: 150px; height: 150px; border-radius: 50%; object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, .75);
+    box-shadow: 0 0 0 6px rgba(255, 43, 43, .25), 0 0 50px rgba(255, 43, 43, .35);
+  }
+  h1 { margin-top: 26px; font-size: 54px; font-weight: 900; letter-spacing: 3px; line-height: 1; }
+  .role { margin-top: 12px; font-size: 19px; color: #c8c8c8; }
+
+  .links { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; }
+  .btn {
+    display: block; padding: 16px;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: rgba(255, 255, 255, .04);
+    color: #fff; text-decoration: none; font-size: 19px;
+    transition: border-color .2s, background .2s, transform .15s;
+  }
+  .btn:hover, .btn:active { border-color: var(--red); background: rgba(255, 43, 43, .12); transform: translateY(-2px); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<video id="bg" autoplay muted loop playsinline preload="auto" src="rain.mp4"></video>
+<audio id="song" src="song.mp3" loop preload="auto"></audio>
+<div class="shade"></div>
+
+<div id="enter">
+  <div class="brand"><span class="w">Z4M</span><span class="r">DAR</span></div>
+  <div class="tap">TAP TO ENTER</div>
+</div>
+
+<nav><span class="w">Z4M</span><span class="r">DAR</span></nav>
+
+<main>
+  <section class="card">
+    <img class="logo" alt="Z4MDAR logo" src="logo.png">
+    <h1><span class="w">Z4M</span><span class="r">DAR</span></h1>
+    <p class="role">Discord Developer</p>
+    <div class="links">
+      <a class="btn" href="#">💬 Discord</a>
+      <a class="btn" href="#">♪ TikTok</a>
+    </div>
+  </section>
+</main>
+
+<script>
+  const bg = document.getElementById('bg');
+  const song = document.getElementById('song');
+  const enter = document.getElementById('enter');
+
+  bg.muted = true;
+  bg.play().catch(() => {});
+
+  // Browsers only allow sound after a tap, so the song starts here
+  enter.addEventListener('click', () => {
+    enter.classList.add('hide');
+    document.body.classList.add('in');
+    bg.play().catch(() => {});
+    song.volume = 0.8;
+    song.play().catch(() => {});
+  });
+</script>
+</body>
+</html>
