@@ -5,13 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <title>Z4MDAR</title>
+<meta name="description" content="Z4MDAR - Discord developer. Custom bots, Discord systems and web projects.">
+<meta property="og:title" content="Z4MDAR">
+<meta property="og:description" content="Discord developer. Custom bots, Discord systems and web projects.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://z4mdar.github.io/logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Ctext x='32' y='46' font-family='Arial' font-weight='900' font-size='40' text-anchor='middle' fill='%23ff2b2b'%3EZ%3C/text%3E%3C/svg%3E">
 <style>
-  :root { --red: #ff2b2b; --glass: rgba(10, 10, 12, .55); --line: rgba(255, 255, 255, .14); }
+  :root { --red: #ff2b2b; --glass: rgba(255, 255, 255, .07); --line: rgba(255, 255, 255, .2); }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: #000; }
+  html { height: 100%; background: #000; }
+  body { min-height: 100%; }
   body {
     font-family: Roboto, "Segoe UI", Arial, sans-serif;
-    background: #000;
+    background: transparent;
     color: #fff;
     overflow-x: hidden;
   }
@@ -22,21 +30,8 @@
     position: fixed; inset: 0; z-index: -2;
     background:
       radial-gradient(ellipse at 50% 30%, rgba(255, 43, 43, .14), transparent 60%),
-      linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .8));
+      linear-gradient(rgba(0, 0, 0, .3), rgba(0, 0, 0, .55));
   }
-
-  /* Enter screen */
-  #enter {
-    position: fixed; inset: 0; z-index: 10;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-    background: #000;
-    cursor: pointer;
-    transition: opacity .8s ease, visibility .8s;
-  }
-  #enter .brand { font-size: 44px; font-weight: 900; letter-spacing: 6px; }
-  #enter .tap { color: #888; font-size: 16px; letter-spacing: 3px; animation: pulse 2s ease-in-out infinite; }
-  #enter.hide { opacity: 0; visibility: hidden; }
-  @keyframes pulse { 50% { opacity: .35; } }
 
   .w { color: #fff; } .r { color: var(--red); }
 
@@ -62,12 +57,11 @@
     background: var(--glass);
     border: 1px solid var(--line);
     border-radius: 28px;
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .6), 0 0 80px rgba(255, 43, 43, .08);
-    opacity: 0; transform: translateY(16px);
-    transition: opacity .9s .3s ease, transform .9s .3s ease;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .25);
+    animation: rise .9s .1s ease both;
   }
-  body.in .card { opacity: 1; transform: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
   .logo {
     width: 150px; height: 150px; border-radius: 50%; object-fit: cover;
@@ -79,22 +73,108 @@
 
   .links { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; }
   .btn {
-    display: block; padding: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px;
     border: 1px solid var(--line); border-radius: 16px;
-    background: rgba(255, 255, 255, .04);
+    background: rgba(255, 255, 255, .06);
     color: #fff; text-decoration: none; font-size: 19px;
     transition: border-color .2s, background .2s, transform .15s;
   }
   .btn:hover, .btn:active { border-color: var(--red); background: rgba(255, 43, 43, .12); transform: translateY(-2px); }
+
+  .ic { width: 26px; height: 26px; flex: none; }
+
+  /* Card */
+  .card { position: relative; overflow: hidden; animation: rise .9s .1s ease both; }
+  .card > *:not(.drops) { position: relative; z-index: 1; }
+
+  /* Mute button */
+  #mute {
+    position: fixed; z-index: 5;
+    right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--glass); border: 1px solid var(--line);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: #fff; cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  #mute:hover, #mute:active { border-color: var(--red); transform: scale(1.06); }
+  #mute svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #mute .off { display: none; }
+  #mute.is-off .on { display: none; }
+  #mute.is-off .off { display: block; }
+
+  /* Typing role, lightning, footer */
+  .caret { display: inline-block; width: 2px; height: 1em; margin-left: 3px; vertical-align: -3px; background: var(--red); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .role { min-height: 1.4em; }
+  .flash { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at 50% 20%, rgba(200, 215, 255, .5), rgba(120, 140, 200, .12) 60%, transparent 80%); }
+  .flash.go { animation: bolt .9s ease-out; }
+  @keyframes bolt { 0% { opacity: 0; } 8% { opacity: 1; } 20% { opacity: .15; } 32% { opacity: .85; } 100% { opacity: 0; } }
+  .foot { margin-top: 26px; font-size: 13px; letter-spacing: 2px; color: rgba(255, 255, 255, .4); }
+
+  /* Bottom section */
+  main { flex-direction: column; gap: 18px; }
+  .more {
+    width: 100%; max-width: 420px; padding: 26px 22px;
+    text-align: center;
+    background: var(--glass); border: 1px solid var(--line); border-radius: 24px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    animation: rise .9s .4s ease both;
+  }
+  .grid1 { display: block; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .svc {
+    padding: 18px 10px; border-radius: 18px;
+    border: 1px solid var(--line); background: rgba(255, 255, 255, .04);
+    transition: border-color .2s, background .2s, transform .15s;
+  }
+  .svc:hover, .svc:active { border-color: var(--red); background: rgba(255, 43, 43, .1); transform: translateY(-2px); }
+  .svc .e { font-size: 30px; }
+  .svc b { display: block; margin-top: 8px; font-size: 16px; }
+  .svc small { display: block; margin-top: 5px; color: #aaa; font-size: 13px; line-height: 1.4; }
+  .more h2 { font-size: 13px; letter-spacing: 4px; font-weight: 700; color: rgba(255, 255, 255, .5); margin-bottom: 14px; }
+  .more p { color: #cfcfcf; font-size: 17px; line-height: 1.6; }
+  .more b { color: #fff; }
+  .more .hl { color: var(--red); font-weight: 700; }
+  .more .tags { margin-top: 14px; font-size: 13px; letter-spacing: 3px; color: rgba(255, 255, 255, .45); }
+
+  /* Enter screen */
+  #enter {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    background: #000; cursor: pointer;
+    transition: opacity .8s ease, visibility .8s;
+  }
+  #enter .brand { font-size: 44px; font-weight: 900; letter-spacing: 6px; }
+  #enter .tap { color: #888; font-size: 16px; letter-spacing: 3px; animation: pulse 2s ease-in-out infinite; }
+  #enter.hide { opacity: 0; visibility: hidden; }
+
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  /* Status + visits */
+  .status {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 18px;
+    padding: 9px 18px; border-radius: 999px; font-size: 15px; color: #ddd;
+    border: 1px solid var(--line); background: rgba(0, 0, 0, .35);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #22e06b; box-shadow: 0 0 10px #22e06b; animation: live 2s ease-in-out infinite; }
+  @keyframes live { 50% { box-shadow: 0 0 0 6px rgba(34, 224, 107, 0); opacity: .7; } }
+  .visits { margin-top: 18px; font-size: 14px; letter-spacing: 1px; color: rgba(255, 255, 255, .55); }
+  .visits[hidden] { display: none; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
 
-<video id="bg" autoplay muted loop playsinline preload="auto" src="rain.mp4"></video>
+<video id="bg" autoplay muted loop playsinline preload="auto">
+  <source src="rain.mp4" type="video/mp4">
+</video>
 <audio id="song" src="song.mp3" loop preload="auto"></audio>
 <div class="shade"></div>
+<div class="flash" id="flash"></div>
 
 <div id="enter">
   <div class="brand"><span class="w">Z4M</span><span class="r">DAR</span></div>
@@ -103,34 +183,139 @@
 
 <nav><span class="w">Z4M</span><span class="r">DAR</span></nav>
 
+<button id="mute" class="is-off" aria-label="Toggle music">
+  <svg class="on" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+  <svg class="off" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>
+</button>
+
 <main>
   <section class="card">
     <img class="logo" alt="Z4MDAR logo" src="logo.png">
     <h1><span class="w">Z4M</span><span class="r">DAR</span></h1>
-    <p class="role">Discord Developer</p>
+    <p class="role"><span id="type">Discord Developer</span><span class="caret"></span></p>
+    <div class="status"><span class="dot"></span>Available for development</div>
     <div class="links">
-      <a class="btn" href="#">💬 Discord</a>
-      <a class="btn" href="#">♪ TikTok</a>
+      <a class="btn" href="#" id="discord" data-user="f9b4"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#5865F2" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg><span class="lbl">Discord: f9b4</span></a>
+      <a class="btn" href="https://www.tiktok.com/@zm4___" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><span class="lbl">TikTok</span></a>
+      <a class="btn" href="https://open.spotify.com/playlist/6XbSfsk0YHer1vfsUiZu4A" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1DB954" d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg><span class="lbl">Spotify</span></a>
     </div>
+    <p class="visits" id="visits" hidden>👁 <span id="views">0</span> visits</p>
+    <p class="foot">© 2026 Z4MDAR</p>
+  </section>
+
+  <section class="more">
+    <h2>WHAT I BUILD</h2>
+    <div class="grid1">
+      <div class="svc"><div class="e">🤖</div><b>Discord Bots</b><small>Commands, moderation, giveaways</small></div>
+    </div>
+  </section>
+
+  <section class="more">
+    <h2>WORK WITH ME</h2>
+    <p>Need a custom bot or a Discord system? Message <span class="hl">f9b4</span> on Discord.</p>
+    <p class="tags">COMMANDS · MODERATION · TICKETS · GIVEAWAYS</p>
   </section>
 </main>
 
 <script>
   const bg = document.getElementById('bg');
   const song = document.getElementById('song');
-  const enter = document.getElementById('enter');
-
+  song.volume = 0.8;
   bg.muted = true;
-  bg.play().catch(() => {});
 
-  // Browsers only allow sound after a tap, so the song starts here
-  enter.addEventListener('click', () => {
-    enter.classList.add('hide');
-    document.body.classList.add('in');
-    bg.play().catch(() => {});
+  const startVideo = () => bg.play().catch(() => {});
+  startVideo();
+
+  // Try to play the song immediately. Browsers usually block sound until the
+  // visitor touches the page, so if blocked it starts on the first touch.
+  let started = false;
+  function startSong() {
+    if (started) return;
+    song.play().then(() => { started = true; removeListeners(); }).catch(() => {});
+  }
+  const evts = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click', 'keydown', 'scroll'];
+  function onFirst() { startVideo(); startSong(); }
+  function removeListeners() { evts.forEach(e => window.removeEventListener(e, onFirst)); }
+  evts.forEach(e => window.addEventListener(e, onFirst, { passive: true }));
+  startSong();
+
+  // Discord button: copies the username when tapped
+  const d = document.getElementById('discord');
+  const lbl = d.querySelector('.lbl');
+  d.addEventListener('click', e => {
+    e.preventDefault();
+    const done = () => { lbl.textContent = 'Copied: f9b4'; setTimeout(() => lbl.textContent = 'Discord: f9b4', 2000); };
+    if (navigator.clipboard) navigator.clipboard.writeText('f9b4').then(done).catch(done);
+    else done();
+  });
+
+
+  // Mute / unmute button
+  const mute = document.getElementById('mute');
+  const sync = () => { mute.classList.toggle('is-off', song.paused); };
+  song.addEventListener('play', sync);
+  song.addEventListener('pause', sync);
+  ['pointerdown', 'touchstart'].forEach(t => mute.addEventListener(t, e => e.stopPropagation(), { passive: true }));
+  mute.addEventListener('click', e => {
+    e.stopPropagation();
+    if (song.paused) { started = true; song.play().catch(() => {}); } else { song.pause(); }
+  });
+  sync();
+
+  // Typing role text
+  const roles = ['Discord Developer', 'Systems Builder', 'Web Coder'];
+  const typeEl = document.getElementById('type');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!still) {
+    let ri = 0, ci = roles[0].length, del = true;
+    (function tick() {
+      const word = roles[ri];
+      if (del) { ci--; } else { ci++; }
+      typeEl.textContent = word.slice(0, ci);
+      let wait = del ? 45 : 85;
+      if (!del && ci === word.length) { del = true; wait = 1800; }
+      else if (del && ci === 0) { del = false; ri = (ri + 1) % roles.length; wait = 350; }
+      setTimeout(tick, wait);
+    })();
+    // first word stays for a moment, then deletes and cycles
+    // Lightning flashes every so often
+    const flash = document.getElementById('flash');
+    (function storm() {
+      setTimeout(() => {
+        flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+        storm();
+      }, 6000 + Math.random() * 9000);
+    })();
+  }
+
+
+  // Tap to enter: starts the song and the rain with sound allowed
+  document.getElementById('enter').addEventListener('click', function () {
+    this.classList.add('hide');
+    started = true;
+    startVideo();
     song.volume = 0.8;
     song.play().catch(() => {});
   });
+
+  // Visit counter (free counter service; hides itself if it can't load)
+  (function () {
+    const box = document.getElementById('visits');
+    const out = document.getElementById('views');
+    let seen = false;
+    try { seen = localStorage.getItem('z4mdar_seen') === '1'; } catch (e) {}
+    const base = 'https://api.counterapi.dev/v1/z4mdar-site/visits';
+    fetch(seen ? base : base + '/up')
+      .then(r => r.json())
+      .then(d => {
+        const n = d.count;
+        if (typeof n !== 'number') throw 0;
+        out.textContent = n.toLocaleString();
+        box.hidden = false;
+        try { localStorage.setItem('z4mdar_seen', '1'); } catch (e) {}
+      })
+      .catch(() => {});
+  })();
 </script>
 </body>
 </html>
